@@ -800,7 +800,7 @@ Projet disponible sur :
 
 
 
-\*\*https://github.com/walatorkhani/Medogui\*\*
+\*\*https://github.com/walatorkhani/MediGuide\*\*
 
 
 
