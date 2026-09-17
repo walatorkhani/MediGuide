@@ -806,6 +806,17 @@ Projet disponible sur :
 
 \---
 
+## Comptes de démonstration
+
+Les comptes de démonstration peuvent être créés automatiquement lors du seed de la base de données.
+
+| Rôle           | Email                             | Mot de passe |
+| -------------- | --------------------------------- | ------------ |
+| Patient        | `patient.demo@mediguide.tn`       | `Demo1234`   |
+| Médecin        | `medecin.demo@mediguide.tn`       | `Demo1234`   |
+| Pharmacie      | `pharmacie.demo@mediguide.tn`     | `Demo1234`   |
+| Parapharmacie  | `parapharmacie.demo@mediguide.tn` | `Demo1234`   |
+| Administrateur | `admin@mediguide.tn`              | `Admin1234`  |
 
 
 \## 👨‍💻 Projet
