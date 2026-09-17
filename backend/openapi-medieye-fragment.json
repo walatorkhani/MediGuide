@@ -1,0 +1,126 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Module medieye — fragment OpenAPI pour la plateforme partagée",
+    "version": "1.0.0",
+    "description": "Fragment destiné à être agrégé par le shell commun de la plateforme modulaire (mediEYE / craftEYE / cityEYE), conformément à la section 7.4 du cahier des charges. Décrit uniquement les routes exposées au format Facility générique, pas l'API interne complète de MédiGuide (voir /api/docs pour celle-ci)."
+  },
+  "servers": [{ "url": "/api/modules/medieye" }],
+  "tags": [{ "name": "medieye", "description": "Module MédiGuide (localisation de professionnels de santé, Jendouba)" }],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+    },
+    "schemas": {
+      "GenericFacility": {
+        "type": "object",
+        "description": "Format Facility générique partagé par tous les modules de la plateforme.",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "category": { "type": "string", "enum": ["medecin", "pharmacie", "parapharmacie"] },
+          "subSpecialty": { "type": "string", "nullable": true },
+          "address": { "type": "string", "nullable": true },
+          "phone": { "type": "string", "nullable": true },
+          "latitude": { "type": "number", "format": "double" },
+          "longitude": { "type": "number", "format": "double" },
+          "features": { "type": "array", "items": { "type": "string" } },
+          "isVerified": { "type": "boolean" },
+          "distanceM": { "type": "number", "nullable": true, "description": "Distance en mètres, présente uniquement si lat/lng fournis." }
+        }
+      },
+      "ModuleManifest": {
+        "type": "object",
+        "properties": {
+          "slug": { "type": "string", "example": "medieye" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "permissions": { "type": "array", "items": { "type": "string", "enum": ["read", "write", "admin"] } },
+          "basePath": { "type": "string" },
+          "apiBasePath": { "type": "string" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/manifest": {
+      "get": {
+        "tags": ["medieye"],
+        "summary": "Décrit le module (slug, permissions RBAC) pour le registre de la plateforme.",
+        "responses": {
+          "200": {
+            "description": "Manifeste du module.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ModuleManifest" } } }
+          }
+        }
+      }
+    },
+    "/facilities": {
+      "get": {
+        "tags": ["medieye"],
+        "summary": "Recherche de fiches au format Facility générique.",
+        "parameters": [
+          { "name": "category", "in": "query", "schema": { "type": "string", "enum": ["medecin", "pharmacie", "parapharmacie"] } },
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "lat", "in": "query", "schema": { "type": "number" } },
+          { "name": "lng", "in": "query", "schema": { "type": "number" } },
+          { "name": "radius", "in": "query", "schema": { "type": "integer", "default": 5000 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultats au format générique.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "module": { "type": "string", "example": "medieye" },
+                    "count": { "type": "integer" },
+                    "results": { "type": "array", "items": { "$ref": "#/components/schemas/GenericFacility" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/facilities/{id}": {
+      "get": {
+        "tags": ["medieye"],
+        "summary": "Détail d'une fiche au format Facility générique.",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Fiche trouvée.", "content": { "application/json": { "schema": { "type": "object", "properties": { "module": { "type": "string" }, "result": { "$ref": "#/components/schemas/GenericFacility" } } } } } },
+          "404": { "description": "Fiche introuvable." }
+        }
+      }
+    },
+    "/permission": {
+      "get": {
+        "tags": ["medieye"],
+        "summary": "Traduit le rôle MédiGuide de l'utilisateur connecté en permission RBAC du module.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Permission résolue.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "module": { "type": "string" },
+                    "role": { "type": "string" },
+                    "permission": { "type": "string", "enum": ["read", "write", "admin"] }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Non authentifié." }
+        }
+      }
+    }
+  }
+}

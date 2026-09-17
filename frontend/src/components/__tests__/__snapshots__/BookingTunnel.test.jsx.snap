@@ -1,0 +1,607 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`BookingTunnel > rend le tunnel initial et produit un snapshot 1`] = `
+<div
+  aria-labelledby="booking-tunnel-title"
+  aria-modal="true"
+  class="fixed inset-0 z-[2000] bg-slate-900/50 flex items-center justify-center p-4"
+  role="dialog"
+>
+  <div
+    class="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[85vh] overflow-y-auto"
+  >
+    <div
+      class="flex items-center justify-between p-4 border-b border-slate-100"
+    >
+      <h2
+        class="font-bold text-slate-900"
+        id="booking-tunnel-title"
+      >
+        Prendre rendez-vous
+      </h2>
+      <button
+        aria-label="Fermer"
+        class="text-slate-400 hover:text-slate-700"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x"
+          fill="none"
+          height="20"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="flex items-center gap-2 px-4 pt-4 text-xs text-slate-400"
+    >
+      <div
+        class="flex items-center gap-2 flex-1"
+      >
+        <span
+          class="w-5 h-5 rounded-full flex items-center justify-center font-medium bg-medical-600 text-white"
+        >
+          1
+        </span>
+        <span
+          class="text-slate-700"
+        >
+          Date
+        </span>
+        <span
+          class="flex-1 h-px bg-slate-100"
+        />
+      </div>
+      <div
+        class="flex items-center gap-2 flex-1"
+      >
+        <span
+          class="w-5 h-5 rounded-full flex items-center justify-center font-medium bg-slate-100 text-slate-400"
+        >
+          2
+        </span>
+        <span
+          class=""
+        >
+          Créneau
+        </span>
+        <span
+          class="flex-1 h-px bg-slate-100"
+        />
+      </div>
+      <div
+        class="flex items-center gap-2 flex-1"
+      >
+        <span
+          class="w-5 h-5 rounded-full flex items-center justify-center font-medium bg-slate-100 text-slate-400"
+        >
+          3
+        </span>
+        <span
+          class=""
+        >
+          Confirmation
+        </span>
+      </div>
+    </div>
+    <div
+      class="p-4"
+    >
+      <p
+        class="text-sm text-slate-500 mb-3"
+      >
+        Dr Test MédiGuide
+         
+        · Médecin généraliste
+      </p>
+      <div
+        class="grid grid-cols-3 gap-2"
+      >
+        <button
+          class="border border-slate-200 rounded-xl py-2.5 text-xs font-medium text-slate-700 hover:border-medical-500 hover:bg-medical-50 capitalize"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-calendar mx-auto mb-1 text-medical-500"
+            fill="none"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 2v3"
+            />
+            <path
+              d="M16 2v3"
+            />
+            <rect
+              height="18"
+              rx="2"
+              width="18"
+              x="3"
+              y="3"
+            />
+            <path
+              d="M3 9h18"
+            />
+          </svg>
+          lun. 24 août
+        </button>
+        <button
+          class="border border-slate-200 rounded-xl py-2.5 text-xs font-medium text-slate-700 hover:border-medical-500 hover:bg-medical-50 capitalize"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-calendar mx-auto mb-1 text-medical-500"
+            fill="none"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 2v3"
+            />
+            <path
+              d="M16 2v3"
+            />
+            <rect
+              height="18"
+              rx="2"
+              width="18"
+              x="3"
+              y="3"
+            />
+            <path
+              d="M3 9h18"
+            />
+          </svg>
+          mar. 25 août
+        </button>
+        <button
+          class="border border-slate-200 rounded-xl py-2.5 text-xs font-medium text-slate-700 hover:border-medical-500 hover:bg-medical-50 capitalize"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-calendar mx-auto mb-1 text-medical-500"
+            fill="none"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 2v3"
+            />
+            <path
+              d="M16 2v3"
+            />
+            <rect
+              height="18"
+              rx="2"
+              width="18"
+              x="3"
+              y="3"
+            />
+            <path
+              d="M3 9h18"
+            />
+          </svg>
+          mer. 26 août
+        </button>
+        <button
+          class="border border-slate-200 rounded-xl py-2.5 text-xs font-medium text-slate-700 hover:border-medical-500 hover:bg-medical-50 capitalize"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-calendar mx-auto mb-1 text-medical-500"
+            fill="none"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 2v3"
+            />
+            <path
+              d="M16 2v3"
+            />
+            <rect
+              height="18"
+              rx="2"
+              width="18"
+              x="3"
+              y="3"
+            />
+            <path
+              d="M3 9h18"
+            />
+          </svg>
+          jeu. 27 août
+        </button>
+        <button
+          class="border border-slate-200 rounded-xl py-2.5 text-xs font-medium text-slate-700 hover:border-medical-500 hover:bg-medical-50 capitalize"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-calendar mx-auto mb-1 text-medical-500"
+            fill="none"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 2v3"
+            />
+            <path
+              d="M16 2v3"
+            />
+            <rect
+              height="18"
+              rx="2"
+              width="18"
+              x="3"
+              y="3"
+            />
+            <path
+              d="M3 9h18"
+            />
+          </svg>
+          ven. 28 août
+        </button>
+        <button
+          class="border border-slate-200 rounded-xl py-2.5 text-xs font-medium text-slate-700 hover:border-medical-500 hover:bg-medical-50 capitalize"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-calendar mx-auto mb-1 text-medical-500"
+            fill="none"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 2v3"
+            />
+            <path
+              d="M16 2v3"
+            />
+            <rect
+              height="18"
+              rx="2"
+              width="18"
+              x="3"
+              y="3"
+            />
+            <path
+              d="M3 9h18"
+            />
+          </svg>
+          sam. 29 août
+        </button>
+        <button
+          class="border border-slate-200 rounded-xl py-2.5 text-xs font-medium text-slate-700 hover:border-medical-500 hover:bg-medical-50 capitalize"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-calendar mx-auto mb-1 text-medical-500"
+            fill="none"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 2v3"
+            />
+            <path
+              d="M16 2v3"
+            />
+            <rect
+              height="18"
+              rx="2"
+              width="18"
+              x="3"
+              y="3"
+            />
+            <path
+              d="M3 9h18"
+            />
+          </svg>
+          dim. 30 août
+        </button>
+        <button
+          class="border border-slate-200 rounded-xl py-2.5 text-xs font-medium text-slate-700 hover:border-medical-500 hover:bg-medical-50 capitalize"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-calendar mx-auto mb-1 text-medical-500"
+            fill="none"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 2v3"
+            />
+            <path
+              d="M16 2v3"
+            />
+            <rect
+              height="18"
+              rx="2"
+              width="18"
+              x="3"
+              y="3"
+            />
+            <path
+              d="M3 9h18"
+            />
+          </svg>
+          lun. 31 août
+        </button>
+        <button
+          class="border border-slate-200 rounded-xl py-2.5 text-xs font-medium text-slate-700 hover:border-medical-500 hover:bg-medical-50 capitalize"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-calendar mx-auto mb-1 text-medical-500"
+            fill="none"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 2v3"
+            />
+            <path
+              d="M16 2v3"
+            />
+            <rect
+              height="18"
+              rx="2"
+              width="18"
+              x="3"
+              y="3"
+            />
+            <path
+              d="M3 9h18"
+            />
+          </svg>
+          mar. 01 sept.
+        </button>
+        <button
+          class="border border-slate-200 rounded-xl py-2.5 text-xs font-medium text-slate-700 hover:border-medical-500 hover:bg-medical-50 capitalize"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-calendar mx-auto mb-1 text-medical-500"
+            fill="none"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 2v3"
+            />
+            <path
+              d="M16 2v3"
+            />
+            <rect
+              height="18"
+              rx="2"
+              width="18"
+              x="3"
+              y="3"
+            />
+            <path
+              d="M3 9h18"
+            />
+          </svg>
+          mer. 02 sept.
+        </button>
+        <button
+          class="border border-slate-200 rounded-xl py-2.5 text-xs font-medium text-slate-700 hover:border-medical-500 hover:bg-medical-50 capitalize"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-calendar mx-auto mb-1 text-medical-500"
+            fill="none"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 2v3"
+            />
+            <path
+              d="M16 2v3"
+            />
+            <rect
+              height="18"
+              rx="2"
+              width="18"
+              x="3"
+              y="3"
+            />
+            <path
+              d="M3 9h18"
+            />
+          </svg>
+          jeu. 03 sept.
+        </button>
+        <button
+          class="border border-slate-200 rounded-xl py-2.5 text-xs font-medium text-slate-700 hover:border-medical-500 hover:bg-medical-50 capitalize"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-calendar mx-auto mb-1 text-medical-500"
+            fill="none"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 2v3"
+            />
+            <path
+              d="M16 2v3"
+            />
+            <rect
+              height="18"
+              rx="2"
+              width="18"
+              x="3"
+              y="3"
+            />
+            <path
+              d="M3 9h18"
+            />
+          </svg>
+          ven. 04 sept.
+        </button>
+        <button
+          class="border border-slate-200 rounded-xl py-2.5 text-xs font-medium text-slate-700 hover:border-medical-500 hover:bg-medical-50 capitalize"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-calendar mx-auto mb-1 text-medical-500"
+            fill="none"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 2v3"
+            />
+            <path
+              d="M16 2v3"
+            />
+            <rect
+              height="18"
+              rx="2"
+              width="18"
+              x="3"
+              y="3"
+            />
+            <path
+              d="M3 9h18"
+            />
+          </svg>
+          sam. 05 sept.
+        </button>
+        <button
+          class="border border-slate-200 rounded-xl py-2.5 text-xs font-medium text-slate-700 hover:border-medical-500 hover:bg-medical-50 capitalize"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-calendar mx-auto mb-1 text-medical-500"
+            fill="none"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 2v3"
+            />
+            <path
+              d="M16 2v3"
+            />
+            <rect
+              height="18"
+              rx="2"
+              width="18"
+              x="3"
+              y="3"
+            />
+            <path
+              d="M3 9h18"
+            />
+          </svg>
+          dim. 06 sept.
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;

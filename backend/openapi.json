@@ -1,0 +1,1157 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "MédiGuide API",
+    "description": "API de localisation de professionnels de santé (médecins, pharmacies, parapharmacies) à Jendouba, Tunisie : recherche géographique, prise de rendez-vous, avis, espace professionnel et administration. Un module complémentaire (medieye) expose ces mêmes fiches au format Facility générique de la plateforme partagée mediEYE/craftEYE/cityEYE sous /api/modules/medieye — voir openapi-medieye-fragment.json.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "MédiGuide"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api",
+      "description": "Développement local"
+    },
+    {
+      "url": "https://<votre-projet>.up.railway.app/api",
+      "description": "Production (Railway)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Inscription, connexion, session"
+    },
+    {
+      "name": "Facilities",
+      "description": "Recherche et fiches médecins/pharmacies/parapharmacies"
+    },
+    {
+      "name": "Disponibilités",
+      "description": "Créneaux des professionnels"
+    },
+    {
+      "name": "Rendez-vous",
+      "description": "Réservation et suivi des rendez-vous patients"
+    },
+    {
+      "name": "Avis",
+      "description": "Avis et notes des patients"
+    },
+    {
+      "name": "Admin",
+      "description": "Back-office : utilisateurs, validation des profils, modération, statistiques"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "token",
+        "description": "JWT d'accès posé en cookie httpOnly après /api/auth/login"
+      },
+      "csrfHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-CSRF-Token",
+        "description": "Requis sur toute requête POST/PATCH/DELETE ; valeur du cookie csrf_token obtenu via GET /api/auth/csrf"
+      }
+    },
+    "schemas": {
+      "Erreur": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "Facility": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "nom": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "medecin",
+              "pharmacie",
+              "parapharmacie"
+            ]
+          },
+          "specialite": {
+            "type": "string",
+            "nullable": true
+          },
+          "adresse": {
+            "type": "string"
+          },
+          "delegation": {
+            "type": "string"
+          },
+          "telephone": {
+            "type": "string",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "noteAvis": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true
+          },
+          "photoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "distanceMetres": {
+            "type": "number",
+            "nullable": true,
+            "description": "Présent uniquement si lat/lng fournis dans la recherche"
+          }
+        }
+      },
+      "Disponibilite": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "facilityId": {
+            "type": "integer"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "heureDebut": {
+            "type": "string",
+            "example": "09:00"
+          },
+          "heureFin": {
+            "type": "string",
+            "example": "09:20"
+          },
+          "estReserve": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RendezVous": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "disponibiliteId": {
+            "type": "integer"
+          },
+          "patientId": {
+            "type": "integer"
+          },
+          "statut": {
+            "type": "string",
+            "enum": [
+              "confirme",
+              "annule"
+            ]
+          },
+          "motif": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Avis": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "facilityId": {
+            "type": "integer"
+          },
+          "patientId": {
+            "type": "integer"
+          },
+          "note": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "commentaire": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Utilisateur": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "nom": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "patient",
+              "professionnel",
+              "administrateur"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "cookieAuth": []
+    }
+  ],
+  "paths": {
+    "/auth/csrf": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Obtenir un jeton CSRF",
+        "description": "Pose le cookie csrf_token à renvoyer dans l'en-tête X-CSRF-Token pour toute requête d'écriture.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Jeton émis"
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Créer un compte",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nom",
+                  "email",
+                  "motDePasse"
+                ],
+                "properties": {
+                  "nom": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "motDePasse": {
+                    "type": "string",
+                    "minLength": 8
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "patient",
+                      "professionnel"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Compte créé"
+          },
+          "400": {
+            "description": "Données invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erreur"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Se connecter",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "motDePasse"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "motDePasse": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Connecté, access token + refresh token posés"
+          },
+          "400": {
+            "description": "Données invalides"
+          },
+          "401": {
+            "description": "Identifiants incorrects"
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Renouveler le token d'accès",
+        "description": "Utilise le refresh token (Redis) pour émettre un nouvel access token.",
+        "responses": {
+          "200": {
+            "description": "Nouveau token émis"
+          },
+          "401": {
+            "description": "Refresh token invalide/expiré"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Se déconnecter",
+        "responses": {
+          "200": {
+            "description": "Déconnecté, session Redis supprimée"
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Profil de l'utilisateur connecté",
+        "responses": {
+          "200": {
+            "description": "Utilisateur courant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Utilisateur"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non authentifié"
+          }
+        }
+      }
+    },
+    "/facilities": {
+      "get": {
+        "tags": [
+          "Facilities"
+        ],
+        "summary": "Rechercher médecins / pharmacies / parapharmacies",
+        "security": [],
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "medecin",
+                "pharmacie",
+                "parapharmacie"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Recherche full-text nom + spécialité"
+          },
+          {
+            "name": "specialite",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ville",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "typeGarde",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "lng",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "radius",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 5000
+            },
+            "description": "Rayon en mètres, plafonné à 50000"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 300
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des établissements (résultat mis en cache Redis 60s si géo)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Facility"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Catégorie invalide"
+          }
+        }
+      }
+    },
+    "/facilities/mine/liste": {
+      "get": {
+        "tags": [
+          "Facilities"
+        ],
+        "summary": "Fiches gérées par le professionnel connecté",
+        "responses": {
+          "200": {
+            "description": "Liste des fiches"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "403": {
+            "description": "Rôle professionnel requis"
+          }
+        }
+      }
+    },
+    "/facilities/{id}": {
+      "get": {
+        "tags": [
+          "Facilities"
+        ],
+        "summary": "Détail d'un établissement",
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fiche détaillée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Facility"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Introuvable"
+          }
+        }
+      }
+    },
+    "/facilities/{id}/revendiquer": {
+      "patch": {
+        "tags": [
+          "Facilities"
+        ],
+        "summary": "Rattacher un compte professionnel à une fiche existante",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fiche rattachée"
+          },
+          "403": {
+            "description": "Rôle professionnel requis"
+          },
+          "409": {
+            "description": "Fiche déjà revendiquée"
+          }
+        }
+      }
+    },
+    "/facilities/{id}/profil": {
+      "patch": {
+        "tags": [
+          "Facilities"
+        ],
+        "summary": "Mettre à jour le profil professionnel (photo, bio, horaires)",
+        "description": "multipart/form-data — upload photo via multer (3 Mo max, jpg/png/webp)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bio": {
+                    "type": "string"
+                  },
+                  "horaires": {
+                    "type": "string"
+                  },
+                  "photo": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profil mis à jour"
+          },
+          "403": {
+            "description": "Propriétaire uniquement"
+          }
+        }
+      }
+    },
+    "/facilities/{facilityId}/disponibilites": {
+      "get": {
+        "tags": [
+          "Disponibilités"
+        ],
+        "summary": "Créneaux libres et futurs d'un établissement",
+        "security": [],
+        "parameters": [
+          {
+            "name": "facilityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Créneaux disponibles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Disponibilite"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/disponibilites/mine": {
+      "get": {
+        "tags": [
+          "Disponibilités"
+        ],
+        "summary": "Tous les créneaux du professionnel connecté (avec patient si réservé)",
+        "responses": {
+          "200": {
+            "description": "Créneaux"
+          },
+          "403": {
+            "description": "Rôle professionnel requis"
+          }
+        }
+      }
+    },
+    "/disponibilites": {
+      "post": {
+        "tags": [
+          "Disponibilités"
+        ],
+        "summary": "Générer un lot de créneaux",
+        "description": "Génère des créneaux sur une plage horaire + durée ; ignore automatiquement les chevauchements avec des créneaux existants.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "facilityId",
+                  "date",
+                  "heureDebut",
+                  "heureFin",
+                  "dureeMinutes"
+                ],
+                "properties": {
+                  "facilityId": {
+                    "type": "integer"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "heureDebut": {
+                    "type": "string"
+                  },
+                  "heureFin": {
+                    "type": "string"
+                  },
+                  "dureeMinutes": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Créneaux créés"
+          },
+          "403": {
+            "description": "Rôle professionnel requis"
+          }
+        }
+      }
+    },
+    "/disponibilites/{id}": {
+      "delete": {
+        "tags": [
+          "Disponibilités"
+        ],
+        "summary": "Supprimer un créneau non réservé",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Supprimé"
+          },
+          "403": {
+            "description": "Propriétaire uniquement"
+          },
+          "409": {
+            "description": "Créneau déjà réservé"
+          }
+        }
+      }
+    },
+    "/rendezvous": {
+      "post": {
+        "tags": [
+          "Rendez-vous"
+        ],
+        "summary": "Réserver un créneau",
+        "description": "Transaction avec verrou de ligne (SELECT ... FOR UPDATE) sur la disponibilité pour empêcher une double réservation ; envoie un e-mail de confirmation.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "disponibiliteId"
+                ],
+                "properties": {
+                  "disponibiliteId": {
+                    "type": "integer"
+                  },
+                  "motif": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Rendez-vous confirmé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RendezVous"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Rôle patient requis"
+          },
+          "404": {
+            "description": "Créneau introuvable"
+          },
+          "409": {
+            "description": "Créneau déjà réservé entre-temps"
+          }
+        }
+      }
+    },
+    "/rendezvous/mes": {
+      "get": {
+        "tags": [
+          "Rendez-vous"
+        ],
+        "summary": "Mes rendez-vous (patient connecté)",
+        "responses": {
+          "200": {
+            "description": "Liste des rendez-vous"
+          }
+        }
+      }
+    },
+    "/rendezvous/{id}/annuler": {
+      "patch": {
+        "tags": [
+          "Rendez-vous"
+        ],
+        "summary": "Annuler un rendez-vous",
+        "description": "Libère le créneau associé (estReserve = false).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Annulé"
+          },
+          "403": {
+            "description": "Auteur uniquement"
+          }
+        }
+      }
+    },
+    "/rendezvous/aujourdhui": {
+      "get": {
+        "tags": [
+          "Rendez-vous"
+        ],
+        "summary": "Rendez-vous confirmés du jour (professionnel connecté)",
+        "responses": {
+          "200": {
+            "description": "Rendez-vous du jour"
+          },
+          "403": {
+            "description": "Rôle professionnel requis"
+          }
+        }
+      }
+    },
+    "/facilities/{facilityId}/avis": {
+      "get": {
+        "tags": [
+          "Avis"
+        ],
+        "summary": "Avis paginés d'un établissement + moyenne",
+        "security": [],
+        "parameters": [
+          {
+            "name": "facilityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Avis + moyenne calculée côté SQL (AVG/COUNT)"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Avis"
+        ],
+        "summary": "Publier un avis",
+        "description": "Un seul avis par patient et par fiche (index unique) ; recalcule Facility.noteAvis.",
+        "parameters": [
+          {
+            "name": "facilityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "note"
+                ],
+                "properties": {
+                  "note": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "commentaire": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Avis publié"
+          },
+          "403": {
+            "description": "Rôle patient requis"
+          },
+          "409": {
+            "description": "Avis déjà publié pour cette fiche"
+          }
+        }
+      }
+    },
+    "/avis/{id}": {
+      "delete": {
+        "tags": [
+          "Avis"
+        ],
+        "summary": "Supprimer un avis",
+        "description": "Auteur uniquement ; recalcule Facility.noteAvis.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Supprimé"
+          },
+          "403": {
+            "description": "Auteur uniquement"
+          }
+        }
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Lister les utilisateurs",
+        "responses": {
+          "200": {
+            "description": "Liste"
+          },
+          "403": {
+            "description": "Rôle administrateur requis"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Créer un utilisateur",
+        "responses": {
+          "201": {
+            "description": "Créé"
+          }
+        }
+      }
+    },
+    "/admin/users/{id}": {
+      "patch": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Modifier un utilisateur",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Modifié"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Supprimer un utilisateur",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Supprimé"
+          }
+        }
+      }
+    },
+    "/admin/medecins": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Lister les fiches médecins (avec statut de validation)",
+        "responses": {
+          "200": {
+            "description": "Liste"
+          }
+        }
+      }
+    },
+    "/admin/medecins/{id}/validation": {
+      "patch": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Valider / invalider une fiche médecin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statut mis à jour"
+          }
+        }
+      }
+    },
+    "/admin/avis": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Lister les avis pour modération",
+        "responses": {
+          "200": {
+            "description": "Liste"
+          }
+        }
+      }
+    },
+    "/admin/avis/{id}/moderation": {
+      "patch": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Modérer un avis (masquer/rétablir)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statut mis à jour"
+          }
+        }
+      }
+    },
+    "/admin/stats": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Statistiques globales (utilisateurs, fiches, RDV, avis)",
+        "responses": {
+          "200": {
+            "description": "Statistiques"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,267 @@
+name: CI/CD MédiGuide
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-tests:
+    name: Backend — Jest + Supertest
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: mediguide
+          POSTGRES_PASSWORD: mediguide
+          POSTGRES_DB: mediguide_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mediguide"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgres://mediguide:mediguide@localhost:5432/mediguide_test
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-test-secret-not-for-production
+      FRONTEND_ORIGIN: http://localhost:5173
+      NODE_ENV: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Installer les dépendances
+        working-directory: backend
+        run: npm ci
+
+      - name: Activer PostGIS sur la base de test
+        run: |
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          PGPASSWORD=mediguide psql -h localhost -U mediguide -d mediguide_test -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+
+      - name: Lancer les tests avec couverture
+        working-directory: backend
+        run: npm run test:coverage
+
+      - name: Publier le rapport de couverture
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: backend/coverage
+
+  frontend-tests:
+    name: Frontend — Vitest + build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Installer les dépendances
+        working-directory: frontend
+        run: npm ci
+
+      - name: Lancer les tests avec couverture
+        working-directory: frontend
+        run: npm run test:coverage
+
+      - name: Vérifier que le build de production passe
+        working-directory: frontend
+        env:
+          VITE_API_URL: https://placeholder.example.com/api
+        run: npm run build
+
+      - name: Publier le rapport de couverture
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage
+          path: frontend/coverage
+
+  e2e-tests:
+    name: E2E — Playwright (parcours RDV)
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: mediguide
+          POSTGRES_PASSWORD: mediguide
+          POSTGRES_DB: mediguide_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mediguide"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgres://mediguide:mediguide@localhost:5432/mediguide_e2e
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-e2e-secret
+      FRONTEND_ORIGIN: http://127.0.0.1:5173
+      NODE_ENV: test
+      E2E_PATIENT_EMAIL: patient.e2e@mediguide.local
+      E2E_PATIENT_PASSWORD: MotDePasse123!
+      VITE_API_URL: http://127.0.0.1:5000/api
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Installer les dépendances backend
+        working-directory: backend
+        run: npm ci
+
+      - name: Installer les dépendances frontend
+        working-directory: frontend
+        run: npm ci
+
+      - name: Activer PostGIS
+        run: |
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          PGPASSWORD=mediguide psql -h localhost -U mediguide -d mediguide_e2e -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+
+      - name: Exécuter les migrations
+        working-directory: backend
+        run: npx sequelize-cli db:migrate
+
+      - name: Importer les médecins de test
+        working-directory: backend
+        run: npm run seed
+
+      - name: Installer Chromium pour Playwright
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Lancer le scénario E2E réel
+        working-directory: frontend
+        run: npm run test:e2e
+
+  lighthouse-audit:
+    name: S10 — Lighthouse performance/accessibilité
+    runs-on: ubuntu-latest
+    needs: [frontend-tests]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+      - name: Installer les dépendances frontend
+        working-directory: frontend
+        run: npm ci
+      - name: Build production
+        working-directory: frontend
+        env:
+          VITE_API_URL: https://placeholder.example.com/api
+        run: npm run build
+      - name: Installer Lighthouse CI
+        run: npm install --global @lhci/cli@0.15.x
+      - name: Audit Lighthouse (objectif >= 85)
+        working-directory: frontend
+        run: lhci autorun --config=../.lighthouserc.json
+      - name: Publier le rapport Lighthouse
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: frontend/lighthouse-report
+
+  # --- Déploiement (uniquement sur push vers main, après succès des tests) ---
+  # Ces deux jobs sont désactivés tant que les secrets ne sont pas configurés
+  # dans Settings > Secrets and variables > Actions du dépôt GitHub :
+  #   RAILWAY_TOKEN  (Railway > Account Settings > Tokens)
+  #   VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID (Vercel > Account Settings > Tokens)
+  # Voir DEPLOIEMENT.md pour la marche à suivre complète (y compris
+  # l'alternative plus simple : déploiement automatique via l'intégration
+  # GitHub native de Railway/Vercel, sans ce job).
+
+  deploy-backend-railway:
+    name: Déployer le backend sur Railway
+    runs-on: ubuntu-latest
+    needs: [backend-tests]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Déployer via Railway CLI
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "RAILWAY_TOKEN non configuré — déploiement ignoré. Voir DEPLOIEMENT.md."
+            exit 0
+          fi
+          npm install -g @railway/cli
+          railway up --service backend --detach
+
+  deploy-frontend-vercel:
+    name: Déployer le frontend sur Vercel
+    runs-on: ubuntu-latest
+    needs: [frontend-tests]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Déployer via Vercel CLI
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "VERCEL_TOKEN non configuré — déploiement ignoré. Voir DEPLOIEMENT.md."
+            exit 0
+          fi
+          npm install -g vercel
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          vercel build --prod --token="$VERCEL_TOKEN"
+          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"

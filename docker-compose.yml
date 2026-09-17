@@ -1,0 +1,42 @@
+# Lance PostgreSQL (avec PostGIS déjà installé) + Redis en local, avec des
+# identifiants qui correspondent exactement à ceux déjà présents dans
+# backend/.env (DATABASE_URL, REDIS_URL) — aucune modification de .env
+# n'est nécessaire après un `docker compose up -d`.
+#
+# Utilisation :
+#   docker compose up -d       # démarre postgres + redis en arrière-plan
+#   docker compose down        # arrête les conteneurs (garde les données)
+#   docker compose down -v     # arrête et supprime aussi les données
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: mediguide-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "0000"
+      POSTGRES_DB: mediguide
+    ports:
+      - "5432:5432"
+    volumes:
+      - mediguide_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: mediguide-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - mediguide_redis_data:/data
+
+volumes:
+  mediguide_postgres_data:
+  mediguide_redis_data:
