@@ -19,3 +19,9 @@ cookies.txt
 # OS
 .DS_Store
 Thumbs.db
+# Backup files
+*.backup.js
+
+# Playwright test outputs
+frontend/playwright-report/
+frontend/test-results/
